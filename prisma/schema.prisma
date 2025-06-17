@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Comments {
+  id        Int       @id @default(autoincrement())
+  content   String?   @db.Text
+  userId    Int?
+  imageId   Int?
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  User      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comments_ibfk_1")
+  Image     Image?    @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comments_ibfk_2")
+
+  @@index([imageId], map: "imageId")
+  @@index([userId], map: "userId")
+}
+
+model Image {
+  id          Int         @id @default(autoincrement())
+  description String?     @db.VarChar(255)
+  title       String?     @db.VarChar(255)
+  imageUrl    String?     @db.VarChar(500)
+  userId      Int?
+  createdAt   DateTime?   @default(now()) @db.DateTime(0)
+  updatedAt   DateTime?   @default(now()) @db.DateTime(0)
+  deletedBy   Int?
+  Comments    Comments[]
+  User        User?       @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Image_ibfk_1")
+  userImage   userImage[]
+
+  @@index([userId], map: "userId")
+}
+
+model User {
+  id        Int         @id @unique(map: "id") @default(autoincrement())
+  fullName  String?     @db.VarChar(255)
+  email     String?     @unique(map: "email") @db.VarChar(255)
+  password  String?     @db.VarChar(255)
+  createAt  DateTime?   @default(now()) @db.DateTime(0)
+  updateAt  DateTime?   @default(now()) @db.DateTime(0)
+  deleteAt  DateTime?   @db.DateTime(0)
+  deleteBy  Int?
+  Comments  Comments[]
+  Image     Image[]
+  userImage userImage[]
+}
+
+model userImage {
+  id        Int       @id @default(autoincrement())
+  userId    Int?
+  imageId   Int?
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  User      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "userImage_ibfk_1")
+  Image     Image?    @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "userImage_ibfk_2")
+
+  @@index([imageId], map: "imageId")
+  @@index([userId], map: "userId")
+}
