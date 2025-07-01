@@ -47,6 +47,7 @@ model User {
   updateAt  DateTime?   @default(now()) @db.DateTime(0)
   deleteAt  DateTime?   @db.DateTime(0)
   deleteBy  Int?
+  imageUrl  String?     @db.VarChar(255)
   Comments  Comments[]
   Image     Image[]
   userImage userImage[]

@@ -5,7 +5,7 @@ import tokenService from "./token.service";
 
 const authService = {
   hello: () => {
-    return `hello`;
+    return `hello authenticz`;
   },
   register: async (req) => {
     const { fullName, email, password } = req.body;
