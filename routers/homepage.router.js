@@ -21,9 +21,12 @@ homePageRouter.get(
   "/checkIfImageSaved/:userId/:imageId",
   homePageController.checkIfImageSavedByUser
 );
+homePageRouter.get(
+  "/getImageAndCreator/:imageId",
+  homePageController.getImageAndCreatorById
+);
 
 // Comment
-homePageRouter.get("/imgUserId/:id", homePageController.imageUserId);
 homePageRouter.get("/imgUserId/:id", homePageController.imageUserId);
 homePageRouter.post("/comments", homePageController.comments);
 
@@ -37,6 +40,7 @@ homePageRouter.get(
   "/getImagesByUser/:userId",
   homePageController.getImagesCreatedByUserId
 );
+
 homePageRouter.get("/imgUserId-list", homePageController.useridImageList);
 homePageRouter.delete("/deleteImage/:id", homePageController.deleteImage);
 export default homePageRouter;

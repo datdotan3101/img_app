@@ -15,7 +15,7 @@ const homepageService = {
     const images = await prisma.image.findMany({
       where: {
         title: {
-          contains: lowerCaseTitle, 
+          contains: lowerCaseTitle,
         },
       },
     });
@@ -42,7 +42,7 @@ const homepageService = {
 
     return {
       image: image,
-      user: image.userId, 
+      user: image.userId,
     };
   },
   imageComments: async (req) => {
@@ -64,7 +64,7 @@ const homepageService = {
   },
   getUserById: async (userId) => {
     const user = await prisma.user.findUnique({
-      where: { id: userId }, 
+      where: { id: userId },
       select: {
         id: true,
         fullName: true,
@@ -79,12 +79,12 @@ const homepageService = {
       throw new Error("User not found");
     }
 
-    return user; // Trả về thông tin người dùng
+    return user; 
   },
   getSavedImagesByUserId: async (userId) => {
     const savedImages = await prisma.userImage.findMany({
       where: {
-        userId: userId, 
+        userId: userId,
       },
       include: {
         Image: {
@@ -103,13 +103,13 @@ const homepageService = {
       throw new Error("No saved images found for this user");
     }
 
-    return savedImages; // Trả về danh sách các ảnh đã lưu
+    return savedImages; 
   },
   useridImageList: async (req) => {},
   getImagesCreatedByUserId: async (userId) => {
     const images = await prisma.image.findMany({
       where: {
-        userId: userId, 
+        userId: userId,
       },
       select: {
         id: true,
@@ -125,45 +125,78 @@ const homepageService = {
       throw new Error("No images found for this user");
     }
 
-    return images; // Trả về danh sách các ảnh đã tạo
+    return images; 
   },
   checkIfImageSavedByUser: async (userId, imageId) => {
     const savedImage = await prisma.userImage.findFirst({
       where: {
-        AND: [
-          { userId: userId },
-          { imageId: imageId }, 
-        ],
+        AND: [{ userId: userId }, { imageId: imageId }],
       },
     });
 
-    // Nếu có bản ghi, người dùng đã lưu hình ảnh này
     if (savedImage) {
-      return true; // Đã lưu
+      return true;
     }
 
-    return false; // Chưa lưu
+    return false;
   },
   deleteImage: async (req) => {
-    const imageId = parseInt(req.params.id);
-    if (isNaN(imageId)) throw new Error("Invalid ID");
+    const imageId = parseInt(req.params.id); 
+    if (isNaN(imageId)) throw new Error("Invalid image ID");
 
-    const imageRecord = await prisma.userImage.findUnique({
+    const image = await prisma.image.findUnique({
       where: { id: imageId }, 
     });
 
-    if (!imageRecord) {
-      throw new Error("Image not found"); 
+    if (!image) {
+      throw new Error("Image not found");
     }
-    await prisma.userImage.delete({
+
+    await prisma.comments.deleteMany({
+      where: { imageId: imageId }, 
+    });
+
+    await prisma.userImage.deleteMany({
+      where: { imageId: imageId }, 
+    });
+
+    await prisma.image.delete({
       where: { id: imageId }, 
     });
 
-    return "ok delete"; 
+    return "Image and related records deleted successfully"; 
   },
   getCommentsByImageId: async (imageId) => {
     const comments = await prisma.comments.findMany({
-      where: { imageId }, // Lọc theo imageId
+      where: { imageId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            createAt: true,
+            updateAt: true,
+            imageUrl: true,
+          },
+        },
+        Image: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!comments || comments.length === 0) {
+      throw new Error("No comments found for this image");
+    }
+
+    return comments;
+  },
+  getImageAndCreatorById: async (imageId) => {
+    const image = await prisma.image.findUnique({
+      where: { id: imageId }, 
       include: {
         User: {
           select: {
@@ -178,11 +211,11 @@ const homepageService = {
       },
     });
 
-    if (!comments || comments.length === 0) {
-      throw new Error("No comments found for this image");
+    if (!image) {
+      throw new Error("Image not found");
     }
 
-    return comments; 
+    return image; 
   },
 };
 
